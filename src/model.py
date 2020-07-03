@@ -41,12 +41,6 @@ class OpenvinoModel:
 
         return self.exec_network
 
-    def infer(self, image):
-        '''
-        Perform sync inference
-        '''
-        return self.exec_network.infer({self.input_blob: image})[self.output_blob]
-
     def check_model(self):
         raise NotImplementedError
 

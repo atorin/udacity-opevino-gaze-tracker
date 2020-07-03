@@ -60,7 +60,13 @@ class FaceDetection(OpenvinoModel):
     Inherit all the main methods from the parent class.
     Only define specific methods here. 
     '''
-    
+
+    def infer(self, image):
+        '''
+        Perform sync inference
+        '''
+        return self.exec_network.infer({self.input_blob: image})[self.output_blob]
+
     def preprocess_input(self, orig_image):
         '''
         Given an input image, height and width:
