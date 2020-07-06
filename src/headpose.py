@@ -82,7 +82,7 @@ class HeadPose(OpenvinoModel):
         yaw = outputs['angle_y_fc']
         pitch = outputs['angle_p_fc']
         roll = outputs['angle_r_fc']
-        return yaw, pitch, roll
+        return np.concatenate([yaw, pitch, roll], axis=1)
 
     def infer_and_plot_vecs(self, image):
         '''

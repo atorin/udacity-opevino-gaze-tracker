@@ -5,7 +5,8 @@ from input_feeder import InputFeeder
 from face_detection import FaceDetection
 from landmarks import Landmarks
 from headpose import HeadPose
-
+from gaze_estimator import GazeEstimator
+import numpy as np
 
 def load_models():
     models = {}
@@ -23,24 +24,76 @@ def load_models():
     models['hp'].load_model('../models/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.xml',
         device="CPU"
     )
+
+    models['gaze'] = GazeEstimator()
+    models['gaze'].load_model('../models/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.xml',
+        device="CPU"
+    )
     return models
+
+def crop_eyes(image, upper_corner, eyes):
+    '''
+    Return the coordinates of the eyes relative to
+    the upper left corner of the face crop.
+    '''
+    e1, e2 = eyes
+    Y,X = upper_corner
+
+    print(f"Eyes coords: {e1}, {e2}")
+
+    # the size of half the square surrounding the eye
+    s = 30
+    eye1_x = (e1[0]-s+X, e1[0]+s+X)
+    eye1_y = (e1[1]-s+Y, e1[1]+s+Y)
+    eye2_x = (e2[0]-s+X, e2[0]+s+X)
+    eye2_y = (e2[1]-s+Y, e2[1]+s+Y)
+
+    e1_slx = slice(eye1_x[0], eye1_x[1])
+    e1_sly = slice(eye1_y[0], eye1_y[1])
+    e2_slx = slice(eye2_x[0], eye2_x[1])
+    e2_sly = slice(eye2_y[0], eye2_y[1])
+
+    eye_crop_1 = image[e1_slx, e1_sly]
+    eye_crop_2 = image[e2_slx, e2_sly]
+
+    return eye_crop_1, eye_crop_2
+
+def get_gaze_angle(gaze_array):
+    '''
+    From the gaze array, extract vertical and horizontal angles.
+    '''
+    arr = gaze_array.flatten()
+    x,y,z = arr[0], arr[1], arr[2]
+    v_angle = np.degrees(np.arctan(x/z))
+    h_angle = np.degrees(np.arctan(y/z))
+
+    return v_angle, h_angle
 
 def main_loop(image, models):
     # find and crop the face
-    face, image = models['fd'].infer_and_crop(image)
+    face, upper_corner, image = models['fd'].infer_and_crop(image)
 
     if face is not None:
         # find landmarks
-        face = models['lm'].infer_and_crop_eyes(face)
-        # print(outputs.flatten())
-
-        print(models['hp'].infer_and_plot_vecs(face))
+        face, eye1, eye2 = models['lm'].infer_and_get_eyes(face)
         
-    return face 
+        # find eye boxes
+        eb1, eb2 = crop_eyes(image, upper_corner, (eye1, eye2))
+        # image = draw_eyes(image, eb1, eb2)
+
+        # find head pose vector
+        angles = models['hp'].infer_and_plot_vecs(face)
+
+        gaze = models['gaze'].infer_gaze(eb1, eb2, angles)
+        print(f"Gaze array: {gaze}")
+        print(f"Gaze angles: {get_gaze_angle(gaze)}")
+
+    return image
 
 def main():
     models = load_models()
-    feed=InputFeeder(input_type='video', input_file='../bin/demo.mp4')
+    # feed=InputFeeder(input_type='video', input_file='../bin/demo.mp4')
+    feed=InputFeeder(input_type='cam')
     feed.load_data()
     for batch in feed.next_batch():
         if batch is not None:

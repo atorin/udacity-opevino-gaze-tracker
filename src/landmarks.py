@@ -39,12 +39,12 @@ def draw_eyes(face, eyes):
 
     print(f"Eyes coords: {e1}, {e2}")
 
-    colour = (255,0,0)
-    face = cv2.circle(face, e1, radius=5, color=colour, thickness=-1)
-    face = cv2.circle(face, e2, radius=5, color=colour, thickness=-1)
+    # colour = (255,0,0)
+    # face = cv2.circle(face, e1, radius=5, color=colour, thickness=-1)
+    # face = cv2.circle(face, e2, radius=5, color=colour, thickness=-1)
 
     # the size of half the square surrounding the eye
-    s = int(face.shape[0]/10)
+    s = 30
     eye1 = ((e1[0]-s, e1[1]-s), (e1[0]+s, e1[1]+s))
     eye2 = ((e2[0]-s, e2[1]-s), (e2[0]+s, e2[1]+s))
 
@@ -52,16 +52,6 @@ def draw_eyes(face, eyes):
     face = cv2.rectangle(face, eye2[0], eye2[1], (0,0,255), 2)
 
     return face
-
-# def crop_face(image, face):
-#     H,W = get_image_shape(image)
-
-#     (x1,y1),(x2,y2),_ = get_coords_score(face, (H,W))
-
-#     slx = slice(x1,x2)
-#     sly = slice(y1,y2)
-
-#     return image[sly,slx]
 
 class Landmarks(OpenvinoModel):
     '''
@@ -108,7 +98,7 @@ class Landmarks(OpenvinoModel):
         eyes = arr[:4]
         return eyes
 
-    def infer_and_crop_eyes(self, image):
+    def infer_and_get_eyes(self, image):
         '''
         Perform inference on the image and crop the face
         '''
@@ -116,6 +106,7 @@ class Landmarks(OpenvinoModel):
         outputs = self.infer(image)
         eyes = self.preprocess_output(outputs)
         image = draw_eyes(image, eyes)
+        eye1, eye2 = get_coords(image, eyes)
         # face_crop = crop_face(image, face)
 
-        return image
+        return image, eye1, eye2

@@ -44,6 +44,9 @@ def draw_box(image, face, thres):
     return image
 
 def crop_face(image, face):
+    '''
+    Return face crop and upper left corner
+    '''
     H,W = get_image_shape(image)
 
     (x1,y1),(x2,y2),_ = get_coords_score(face, (H,W))
@@ -51,7 +54,7 @@ def crop_face(image, face):
     slx = slice(x1,x2)
     sly = slice(y1,y2)
 
-    return image[sly,slx]
+    return image[sly,slx], (x1,y1)
 
 class FaceDetection(OpenvinoModel):
     '''
@@ -115,6 +118,6 @@ class FaceDetection(OpenvinoModel):
         outputs = self.infer(proc_image)
         face = self.preprocess_output(outputs)
         image = draw_box(image, face, 0.6)
-        face_crop = crop_face(image, face)
+        face_crop, upper_corner = crop_face(image, face)
 
-        return face_crop, image
+        return face_crop, upper_corner, image
