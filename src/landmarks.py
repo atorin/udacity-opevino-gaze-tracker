@@ -37,7 +37,7 @@ def draw_eyes(face, eyes):
     '''
     e1,e2 = get_coords(face, eyes)
 
-    print(f"Eyes coords: {e1}, {e2}")
+    # print(f"Eyes coords: {e1}, {e2}")
 
     # colour = (255,0,0)
     # face = cv2.circle(face, e1, radius=5, color=colour, thickness=-1)
@@ -79,7 +79,7 @@ class Landmarks(OpenvinoModel):
         height = SIDE
         width = SIDE
 
-        print(f"Image size: {image.shape}")
+        # print(f"Image size: {image.shape}")
         try:
             image = cv2.resize(image, (width, height), cv2.INTER_CUBIC)
         except TypeError:

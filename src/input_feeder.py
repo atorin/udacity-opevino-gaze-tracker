@@ -37,6 +37,9 @@ class InputFeeder:
         while True:
             for _ in range(1):
                 _, frame=self.cap.read()
+                if self.input_type=='cam':
+                    # horizontally flip image
+                    frame = cv2.flip(frame, 1)
             yield frame
 
 

@@ -64,7 +64,7 @@ class HeadPose(OpenvinoModel):
         height = SIDE
         width = SIDE
 
-        print(f"Image size: {image.shape}")
+        # print(f"Image size: {image.shape}")
         try:
             image = cv2.resize(image, (width, height), cv2.INTER_CUBIC)
         except TypeError:

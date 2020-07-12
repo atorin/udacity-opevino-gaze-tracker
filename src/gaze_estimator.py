@@ -71,12 +71,12 @@ class GazeEstimator(OpenvinoModel):
         '''
 
 
-        print(f"Real Eye 1: {eye1.shape}")
+        # print(f"Real Eye 1: {eye1.shape}")
         proc_eye1 = self.preprocess_input(eye1)
-        print(f"Eye 1: {proc_eye1.shape}")
-        print(f"Real Eye 2: {eye2.shape}")
+        # print(f"Eye 1: {proc_eye1.shape}")
+        # print(f"Real Eye 2: {eye2.shape}")
         proc_eye2 = self.preprocess_input(eye2)
-        print(f"Eye 2: {proc_eye2.shape}")
+        # print(f"Eye 2: {proc_eye2.shape}")
         # build input blob
         input_blob = {
             'left_eye_image' : proc_eye1,

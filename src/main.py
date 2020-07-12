@@ -7,6 +7,7 @@ from landmarks import Landmarks
 from headpose import HeadPose
 from gaze_estimator import GazeEstimator
 import numpy as np
+from mouse_controller import MouseController
 
 def load_models():
     models = {}
@@ -39,7 +40,7 @@ def crop_eyes(image, upper_corner, eyes):
     e1, e2 = eyes
     Y,X = upper_corner
 
-    print(f"Eyes coords: {e1}, {e2}")
+    # print(f"Eyes coords: {e1}, {e2}")
 
     # the size of half the square surrounding the eye
     s = 30
@@ -58,16 +59,33 @@ def crop_eyes(image, upper_corner, eyes):
 
     return eye_crop_1, eye_crop_2
 
-def get_gaze_angle(gaze_array):
-    '''
-    From the gaze array, extract vertical and horizontal angles.
-    '''
-    arr = gaze_array.flatten()
-    x,y,z = arr[0], arr[1], arr[2]
-    v_angle = np.degrees(np.arctan(x/z))
-    h_angle = np.degrees(np.arctan(y/z))
+def get_position(x, y):
+    SPEED = 10
+    X = int(x * SPEED * 640 + 640)
+    Y = int(y * SPEED * 400 + 400)
+    return X, Y
 
-    return v_angle, h_angle
+def plot_position(image, x, y):
+    x = int(x)
+    y = int(y)
+    image = cv2.circle(image, (x,y), radius=5, color=(255,255,255), thickness=-1)
+    return image
+
+def plot_gaze(image, gaze, eye1, eye2):
+    '''
+    Plot arrow from eye to gaze.
+
+    Test the length of the gaze vector with different values
+    of the expansion coefficient.
+    '''
+    EXP=100
+    end_1 = int(eye1[0]+EXP*gaze[0]), int(eye1[1]-EXP*gaze[1])
+    end_2 = int(eye2[0]+EXP*gaze[0]), int(eye2[1]-EXP*gaze[1])
+    image = cv2.line(image, eye1, end_1, (255,255,255), thickness=2)
+    image = cv2.line(image, eye2, end_2, (255,255,255), thickness=2)
+
+    print(f"From {eye1} to {end_1}")
+    return image
 
 def main_loop(image, models):
     # find and crop the face
@@ -84,22 +102,31 @@ def main_loop(image, models):
         # find head pose vector
         angles = models['hp'].infer_and_plot_vecs(face)
 
-        gaze = models['gaze'].infer_gaze(eb1, eb2, angles)
-        print(f"Gaze array: {gaze}")
-        print(f"Gaze angles: {get_gaze_angle(gaze)}")
+        gaze = models['gaze'].infer_gaze(eb1, eb2, angles).flatten()
 
-    return image
+        face = plot_gaze(face, gaze, eye1, eye2)
+
+        # print(f"Gaze array: {gaze}")
+
+        x, y = get_position(gaze[0], gaze[1])
+
+    pos = gaze[0], gaze[1]
+
+    return image, pos
 
 def main():
+    mouse = MouseController('low', 'slow')
     models = load_models()
     # feed=InputFeeder(input_type='video', input_file='../bin/demo.mp4')
     feed=InputFeeder(input_type='cam')
     feed.load_data()
     for batch in feed.next_batch():
         if batch is not None:
-            cv2.imshow('frame', main_loop(batch, models))
+            image, pos = main_loop(batch, models)
+            cv2.imshow('frame', image)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+            mouse.move(pos[0], pos[1])
         else:
             break
     feed.close()

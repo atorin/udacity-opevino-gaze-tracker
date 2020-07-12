@@ -96,7 +96,7 @@ class FaceDetection(OpenvinoModel):
         # grab content of the blob
         content = outputs[0][0]
         face = content[0]
-        print(face)
+        # print(face)
         if face[1]==0:
             # no faces found
             return []
