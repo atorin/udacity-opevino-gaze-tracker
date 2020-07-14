@@ -2,6 +2,7 @@ import os
 import sys
 import cv2
 import numpy as np
+import time
 
 from input_feeder import InputFeeder
 from parser import get_args
@@ -10,6 +11,13 @@ from landmarks import Landmarks
 from headpose import HeadPose
 from gaze_estimator import GazeEstimator
 from mouse_controller import MouseController
+
+MODELS = {
+    'fd': "Face detection",
+    'lm': "Landmark detection",
+    'hp': "Head pose estimation",
+    'ge': "Gaze estimation"
+}
 
 def load_models(p):
     """
@@ -26,7 +34,9 @@ def load_models(p):
 
     # Load all the files with the relative device
     for label in ['fd','lm','hp','ge']:
+        start = time.time()
         models[label].load_model(p[f'mod_{label}'], device=p[f'device_{label}'])    
+        print(f'Model: {MODELS[label]} --- Loading time: {1000*(time.time()-start):.1f} ms')
 
     return models
 
@@ -134,7 +144,6 @@ def main():
 
     feed=InputFeeder(input_type=input_type, input_file=input_file)
     feed.load_data()
-    mouse.move(0,0)
     for batch in feed.next_batch():
         if batch is not None:
             image, pos = main_loop(batch, models)

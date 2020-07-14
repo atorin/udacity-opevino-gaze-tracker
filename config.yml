@@ -7,11 +7,11 @@ device: 'CPU'
 # Path to the face detection model (XML file)
 mod_fd: './models/face-detection-adas-binary-0001/FP32-INT1/face-detection-adas-binary-0001.xml'
 # Path to the landmarks model (XML file)
-mod_lm: './models/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.xml'
+mod_lm: './models/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml'
 # Path to the head pose estimation model (XML file)
-mod_hp: './models/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml'
+mod_hp: './models/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml'
 # Path to the gaze estimation model (XML file)
-mod_ge: './models/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml'
+mod_ge: './models/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml'
 # Devices to be used with the various models
 device_fd: 'CPU'
 device_lm: 'CPU'

@@ -1,9 +1,8 @@
 # Computer Pointer Controller
 
-*TODO:* Write a short introduction to your project
+The Computer Pointer Controller is an AI-driven app that controls the position of the mouse pointer on the screen with the gaze of the person in front of the screen. 
 
 ## Project Set Up and Installation
-*TODO:* Explain the setup procedures to run your project. For instance, this can include your project directory structure, the models you need to download and where to place them etc. Also include details about how to install the dependencies your project requires.
 
 ### Prerequisites
 
@@ -85,16 +84,44 @@ python src/main.py --print
 
 
 ## Benchmarks
-*TODO:* Include the benchmark results of running your model on multiple hardwares and multiple model precisions. Your benchmarks can include: model loading time, input/output processing time, model inference time etc.
+
+### Loading times
+
+Models with different accuracies have different loading times. The following table summarises the loading times.
+
+|                     | FP32   | FP16   |
+|---------------------|--------|--------|
+| Face detection*     | 254 ms | N/A    |
+| Landmarks detection | 252 ms | 129 ms |
+| Headpose estimation | 140 ms | 113 ms |
+| Gaze estimation     | 185 ms | 139 ms |
+
+*The precision for the face detection model is FP32-INT1.
+
+### Performance of the gaze estimation model
+
+The inference times for the gaze estimation model vary according to the selected precision. The following table summarises the main results. 
+
+| Precision | Inference time |
+|-----------|----------------|
+| FP16-INT8 | 1.95 ms        |
+| FP16      | 2.11 ms        |
+| FP32      | 2.18 ms        |
+
+The results have been obtained as an average of the inference times over 100 inferences.
 
 ## Results
-*TODO:* Discuss the benchmark results and explain why you are getting the results you are getting. For instance, explain why there is difference in inference time for FP32, FP16 and INT8 models.
 
-## Stand Out Suggestions
-This is where you can provide information about the stand out suggestions that you have attempted.
+A lower accuracy of the models generally allows for higher performances. As can be seen from the previous table, running the gaze estimation model at FP16-INT8 precision reduces the inference time by almost 12\% with respect to FP32. 
 
-### Async Inference
-If you have used Async Inference in your code, benchmark the results and explain its effects on power and performance of your project.
+### Moving the mouse
+
+It is interesting to compare the inference times with the time spent running the rest of the code. 
+
+A simple experiment shows that most part of the time (about 113 ms) is spent during the call to the `mouse.move()` function. At least on MacOS, this is the most expensive line of the main loop of the code. 
 
 ### Edge Cases
-There will be certain situations that will break your inference flow. For instance, lighting changes or multiple people in the frame. Explain some of the edge cases you encountered in your project and how you solved them to make your project more robust.
+
+In certain cases, a face might not be present in the image. When the app cannot find a valid face in the image, it gives a warning and exits the program.
+
+When multiple faces are present, only the one with the highest score is retained and processed. 

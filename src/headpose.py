@@ -30,13 +30,6 @@ def get_coords(face, eyes):
 
     return (x1,y1), (x2,y2)
 
-def draw_vecs(face, angles):
-    '''
-    Draw boxes around a person in the image.
-
-    '''
-    return face
-
 class HeadPose(OpenvinoModel):
     '''
     Class for the Face Detection Model.
@@ -91,6 +84,5 @@ class HeadPose(OpenvinoModel):
         # perform inference
         outputs = self.infer(image)
         angles = self.preprocess_output(outputs)
-        image = draw_vecs(image, angles)
 
         return angles
