@@ -9,7 +9,7 @@ class OpenvinoModel:
     '''
     Parent class for all the models.
 
-    Use to DRY the code.
+    Use this approach to DRY the code.
     '''
     def __init__(self):
         ### Initialize any class variables desired ###

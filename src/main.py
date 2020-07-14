@@ -1,35 +1,35 @@
 import os
 import cv2
+import numpy as np
 
 from input_feeder import InputFeeder
+from parser import get_args
 from face_detection import FaceDetection
 from landmarks import Landmarks
 from headpose import HeadPose
 from gaze_estimator import GazeEstimator
-import numpy as np
 from mouse_controller import MouseController
 
-def load_models():
+def load_models(p):
+    """
+    Load the OpenVINO models in a dictionary to handle them more easily
+
+    Input: `p`, a dictionary with the models' paths
+    """
+    # Get the device ('CPU' will be selected if None)
+    device = p.get('device', 'CPU')
     models = {}
     models['fd'] = FaceDetection()
-    models['fd'].load_model('../models/face-detection-adas-binary-0001/FP32-INT1/face-detection-adas-binary-0001.xml',
-        device="CPU"    
-    )
+    models['fd'].load_model(p['mod_fd'], device=device)    
 
     models['lm'] = Landmarks()
-    models['lm'].load_model('../models/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.xml',
-        device="CPU"
-    )
+    models['lm'].load_model(p['mod_lm'], device=device)
 
     models['hp'] = HeadPose()
-    models['hp'].load_model('../models/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.xml',
-        device="CPU"
-    )
+    models['hp'].load_model(p['mod_hp'], device=device)
 
     models['gaze'] = GazeEstimator()
-    models['gaze'].load_model('../models/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.xml',
-        device="CPU"
-    )
+    models['gaze'].load_model(p['mod_ge'], device=device)
     return models
 
 def crop_eyes(image, upper_corner, eyes):
@@ -84,7 +84,7 @@ def plot_gaze(image, gaze, eye1, eye2):
     image = cv2.line(image, eye1, end_1, (255,255,255), thickness=2)
     image = cv2.line(image, eye2, end_2, (255,255,255), thickness=2)
 
-    print(f"From {eye1} to {end_1}")
+    # print(f"From {eye1} to {end_1}")
     return image
 
 def main_loop(image, models):
@@ -115,11 +115,24 @@ def main_loop(image, models):
     return image, pos
 
 def main():
-    mouse = MouseController('low', 'slow')
-    models = load_models()
-    # feed=InputFeeder(input_type='video', input_file='../bin/demo.mp4')
-    feed=InputFeeder(input_type='cam')
+    # Load parameters
+    params = get_args()
+
+    mouse_prec = params['mouse_prec']
+    mouse_speed = params['mouse_speed']
+    mouse = MouseController(mouse_prec, mouse_speed)
+    models = load_models(params)
+
+    # Load input feed
+    input_type = params['input_type']
+    if input_type=='cam':
+        input_file = None
+    else:
+        input_file = params['input_file_path']
+
+    feed=InputFeeder(input_type=input_type, input_file=input_file)
     feed.load_data()
+    mouse.move(0,0)
     for batch in feed.next_batch():
         if batch is not None:
             image, pos = main_loop(batch, models)
@@ -127,6 +140,7 @@ def main():
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
             mouse.move(pos[0], pos[1])
+            # break
         else:
             break
     feed.close()

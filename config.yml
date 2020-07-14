@@ -1,0 +1,22 @@
+# --- Configuration file for AI mouse pointer app
+
+# Specify the target device to infer on: 
+# - CPU, GPU, FPGA or MYRIAD is acceptable. 
+# - (CPU by default)
+device: 'CPU'
+# Path to the face detection model (XML file)
+mod_fd: './models/face-detection-adas-binary-0001/FP32-INT1/face-detection-adas-binary-0001.xml'
+# Path to the landmarks model (XML file)
+mod_lm: './models/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.xml'
+# Path to the head pose estimation model (XML file)
+mod_hp: './models/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml'
+# Path to the gaze estimation model (XML file)
+mod_ge: './models/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml'
+# Input file type (either `cam` or `video`)
+input_type: 'cam'
+# Input file path (required for `video` input_type)
+input_file_path: './bin/demo.mp4'
+# Mouse precision (Values: `low`, `medium`, `high`)
+mouse_prec: 'high'
+# Mouse speed (Values: `slow`, `medium`, `fast`)
+mouse_speed: 'fast'
