@@ -1,4 +1,5 @@
 import os
+import sys
 import cv2
 import numpy as np
 
@@ -17,7 +18,6 @@ def load_models(p):
     Input: `p`, a dictionary with the models' paths
     """
     # Get the device ('CPU' will be selected if None)
-    device = p.get('device', 'CPU')
     models = {}
     models['fd'] = FaceDetection()
     models['lm'] = Landmarks()
@@ -89,7 +89,8 @@ def main_loop(image, models):
     # find and crop the face
     face, upper_corner, image = models['fd'].infer_and_crop(image)
 
-    if face is not None:
+    # check if there is at least one face
+    if np.all(face.shape):
         # find landmarks
         face, eye1, eye2 = models['lm'].infer_and_get_eyes(face)
         
@@ -108,7 +109,10 @@ def main_loop(image, models):
 
         x, y = get_position(gaze[0], gaze[1])
 
-    pos = gaze[0], gaze[1]
+        pos = gaze[0], gaze[1]
+    else:
+        print("===ERROR!\nNo one is in front of the camera. Closing program!\n===")
+        sys.exit(0)
 
     return image, pos
 
