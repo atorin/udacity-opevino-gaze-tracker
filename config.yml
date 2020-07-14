@@ -12,7 +12,12 @@ mod_lm: './models/landmarks-regression-retail-0009/FP16-INT8/landmarks-regressio
 mod_hp: './models/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml'
 # Path to the gaze estimation model (XML file)
 mod_ge: './models/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml'
-# Input file type (either `cam` or `video`)
+# Devices to be used with the various models
+device_fd: 'CPU'
+device_lm: 'CPU'
+device_hp: 'CPU'
+device_ge: 'CPU'
+# Input fileCPUpe (either `cam` or `video`)
 input_type: 'cam'
 # Input file path (required for `video` input_type)
 input_file_path: './bin/demo.mp4'

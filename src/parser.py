@@ -15,10 +15,22 @@ mod_hp
     Path to the head pose estimation model (XML file)
 mod_ge
     Path to the gaze estimation model (XML file)
+device_fd
+    Device for inference with the face detection model
+device_lm
+    Device for inference with the landmarks model 
+device_hp
+    Device for inference with the head pose estimation model 
+device_ge
+    Device for inference with the gaze estimation model 
 input_type
     Input file type (either `cam` or `video`)
 input_file_path
     Input file path (required for `video` input_type)
+mouse_prec
+    Mouse precision (Values: `low`, `medium`, `high`)
+mouse_speed
+    Mouse speed (Values: `slow`, `medium`, `fast`)
 """
 
 def validate_args(args):

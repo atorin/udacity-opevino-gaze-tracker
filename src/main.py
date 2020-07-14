@@ -20,16 +20,14 @@ def load_models(p):
     device = p.get('device', 'CPU')
     models = {}
     models['fd'] = FaceDetection()
-    models['fd'].load_model(p['mod_fd'], device=device)    
-
     models['lm'] = Landmarks()
-    models['lm'].load_model(p['mod_lm'], device=device)
-
     models['hp'] = HeadPose()
-    models['hp'].load_model(p['mod_hp'], device=device)
+    models['ge'] = GazeEstimator()
 
-    models['gaze'] = GazeEstimator()
-    models['gaze'].load_model(p['mod_ge'], device=device)
+    # Load all the files with the relative device
+    for label in ['fd','lm','hp','ge']:
+        models[label].load_model(p[f'mod_{label}'], device=p[f'device_{label}'])    
+
     return models
 
 def crop_eyes(image, upper_corner, eyes):
@@ -102,7 +100,7 @@ def main_loop(image, models):
         # find head pose vector
         angles = models['hp'].infer_and_plot_vecs(face)
 
-        gaze = models['gaze'].infer_gaze(eb1, eb2, angles).flatten()
+        gaze = models['ge'].infer_gaze(eb1, eb2, angles).flatten()
 
         face = plot_gaze(face, gaze, eye1, eye2)
 
